@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             loadWithOverviewMode = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             val defaultUA = WebSettings.getDefaultUserAgent(this@MainActivity)
-            userAgentString = "$defaultUA YuemAPP"
+            userAgentString = "$defaultUA YuemAPPv1.2"
             cacheMode = WebSettings.LOAD_DEFAULT
         }
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
