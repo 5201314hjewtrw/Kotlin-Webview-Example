@@ -58,7 +58,13 @@ class MainActivity : AppCompatActivity() {
             // 标准UA+YuemAPP标识
             val defaultUA = WebSettings.getDefaultUserAgent(this@MainActivity)
             userAgentString = "$defaultUA YuemAPP"
+            cacheMode = WebSettings.LOAD_DEFAULT
+            loadsImagesAutomatically = true
+            javaScriptCanOpenWindowsAutomatically = true
+            setSupportMultipleWindows(true)
         }
+        // 硬件加速（通常默认开启，保险起见加上）
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
