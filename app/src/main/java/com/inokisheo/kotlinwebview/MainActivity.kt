@@ -13,6 +13,7 @@ import android.webkit.*
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
     private val handler = Handler(Looper.getMainLooper())
     private var timeoutRunnable: Runnable? = null
+    private lateinit var fab: FloatingActionButton
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +47,30 @@ class MainActivity : AppCompatActivity() {
             )
         )
         frameLayout.addView(progressBar, progressBarParams)
+
+        // 悬浮按钮（缩小为48dp，距离底部128px，右侧48px）
+        fab = FloatingActionButton(this)
+        fab.setImageResource(android.R.drawable.ic_menu_revert)
+        // 设置较小的尺寸并上移
+        fab.size = FloatingActionButton.SIZE_MINI
+        val density = resources.displayMetrics.density
+        val fabParams = FrameLayout.LayoutParams(
+            (40 * density).toInt(), // 更小的宽度
+            (40 * density).toInt()  // 更小的高度
+        )
+        fabParams.gravity = Gravity.BOTTOM or Gravity.END
+        fabParams.setMargins(
+            0, 0,
+            (16 * density).toInt(), // 右侧间距16dp
+            (64 * density).toInt()  // 底部间距64dp（比原来上移一些）
+        )
+        frameLayout.addView(fab, fabParams)
+
         setContentView(frameLayout)
+
+        fab.setOnClickListener {
+            webView.loadUrl("https://cs.yuemlk.xyz")
+        }
 
         // WebView 设置
         webView.settings.apply {
@@ -55,18 +80,15 @@ class MainActivity : AppCompatActivity() {
             useWideViewPort = true
             loadWithOverviewMode = true
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-            // 标准UA+YuemAPP标识
             val defaultUA = WebSettings.getDefaultUserAgent(this@MainActivity)
             userAgentString = "$defaultUA YuemAPP"
             cacheMode = WebSettings.LOAD_DEFAULT
         }
-        // 硬件加速（通常默认开启，保险起见加上）
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 progressBar.visibility = View.VISIBLE
-                // 启动30秒超时
                 timeoutRunnable?.let { handler.removeCallbacks(it) }
                 timeoutRunnable = Runnable {
                     progressBar.visibility = View.GONE
@@ -136,6 +158,7 @@ class MainActivity : AppCompatActivity() {
                 customView = fullScreenContainer
                 customViewCallback = callback
                 webView.visibility = View.GONE
+                fab.visibility = View.GONE
             }
 
             override fun onHideCustomView() {
@@ -145,9 +168,9 @@ class MainActivity : AppCompatActivity() {
                     customView = null
                 }
                 webView.visibility = View.VISIBLE
-                // 恢复自动旋转
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 customViewCallback?.onCustomViewHidden()
+                fab.visibility = View.VISIBLE
             }
         }
 
