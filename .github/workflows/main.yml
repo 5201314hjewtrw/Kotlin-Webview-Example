@@ -1,9 +1,8 @@
-name: Build Debug APK
+name: Build and Release Debug APK
 
 on:
   push:
     branches: [ master, main ]
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -23,15 +22,33 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
-
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
+      - name: Rename APK with commit id
+        id: rename_apk
+        run: |
+          COMMIT_ID=${GITHUB_SHA::7}
+          APK_PATH=$(find . -name "*.apk" | grep "/build/outputs/apk/debug/")
+          NEW_NAME="app_${COMMIT_ID}.apk"
+          cp "$APK_PATH" "$NEW_NAME"
+          echo "apk_name=$NEW_NAME" >> $GITHUB_OUTPUT
+          ls -l $NEW_NAME # 输出一下文件信息方便排查
+
+      - name: Set release tag and name
+        id: set_tag
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          TAG_NAME="release-${SHORT_SHA}"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "release_name=Auto Release $TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release and Upload APK
+        uses: softprops/action-gh-release@v2
         with:
-          name: debug-apk
-          path: |
-            **/build/outputs/apk/debug/*.apk
+          tag_name: ${{ steps.set_tag.outputs.tag_name }}
+          name: ${{ steps.set_tag.outputs.release_name }}
+          body: "自动发布于 commit ${{ github.sha }}"
+          files: ${{ steps.rename_apk.outputs.apk_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
