@@ -48,21 +48,25 @@ class MainActivity : AppCompatActivity() {
         )
         frameLayout.addView(progressBar, progressBarParams)
 
-        // 悬浮按钮（缩小为48dp，距离底部128px，右侧48px）
+        // 悬浮按钮（缩小，且大幅度上移）
         fab = FloatingActionButton(this)
         fab.setImageResource(android.R.drawable.ic_menu_revert)
-        // 设置较小的尺寸并上移
         fab.size = FloatingActionButton.SIZE_MINI
         val density = resources.displayMetrics.density
+        val fabSize = (40 * density).toInt() // 40dp
+        
+        // 计算上移3个fab高度（图片大小为fabSize），加上原本的64dp
+        val baseBottomMargin = (64 * density).toInt()
+        val moveUpBy = fabSize * 3
         val fabParams = FrameLayout.LayoutParams(
-            (40 * density).toInt(), // 更小的宽度
-            (40 * density).toInt()  // 更小的高度
+            fabSize,
+            fabSize
         )
         fabParams.gravity = Gravity.BOTTOM or Gravity.END
         fabParams.setMargins(
             0, 0,
             (16 * density).toInt(), // 右侧间距16dp
-            (64 * density).toInt()  // 底部间距64dp（比原来上移一些）
+            baseBottomMargin + moveUpBy // 底部间距增大，实现上移
         )
         frameLayout.addView(fab, fabParams)
 
