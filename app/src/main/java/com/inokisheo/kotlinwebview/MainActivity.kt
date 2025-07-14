@@ -59,9 +59,6 @@ class MainActivity : AppCompatActivity() {
             val defaultUA = WebSettings.getDefaultUserAgent(this@MainActivity)
             userAgentString = "$defaultUA YuemAPP"
             cacheMode = WebSettings.LOAD_DEFAULT
-            loadsImagesAutomatically = true
-            javaScriptCanOpenWindowsAutomatically = true
-            setSupportMultipleWindows(true)
         }
         // 硬件加速（通常默认开启，保险起见加上）
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
